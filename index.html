@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#101827" />
+  <title>Agent Performance Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark">AT</div><div><strong>Agent Tracker</strong><small>Performance workspace</small></div></div>
+    <nav aria-label="Main navigation">
+      <button class="nav-link active" data-view="dashboard"><span>▦</span> Dashboard</button>
+      <button class="nav-link" data-view="daily"><span>＋</span> Daily entry</button>
+      <button class="nav-link" data-view="history"><span>◷</span> Records & history</button>
+      <button class="nav-link" data-view="agents"><span>♙</span> Agents</button>
+      <button class="nav-link" data-view="actions"><span>✓</span> Coaching & actions</button>
+      <button class="nav-link" data-view="backup"><span>⇅</span> Backup & settings</button>
+    </nav>
+    <div class="sidebar-note"><span class="status-dot"></span> Saved in this browser<small>Export a backup regularly.</small></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar"><div><p class="eyebrow">TEAM OPERATIONS</p><h1 id="page-title">Dashboard</h1></div><div class="topbar-right"><span id="today-label" class="date-chip"></span><button class="button primary" id="quick-entry">＋ Daily entry</button></div></header>
+
+    <section class="view active" id="view-dashboard">
+      <div class="section-heading"><div><h2>Daily overview</h2><p>A clear view of attendance and performance misses.</p></div><div class="inline-field"><label for="dashboard-date">Reporting date</label><input id="dashboard-date" type="date" /></div></div>
+      <div class="kpi-grid" id="kpi-grid"></div>
+      <div class="content-grid">
+        <article class="panel"><div class="panel-heading"><div><h3>Misses by category</h3><p>For the selected date</p></div></div><div id="category-chart" class="bar-chart"></div></article>
+        <article class="panel"><div class="panel-heading"><div><h3>Attendance snapshot</h3><p>Agent records for the selected date</p></div></div><div id="attendance-summary" class="attendance-summary"></div></article>
+      </div>
+      <article class="panel"><div class="panel-heading"><div><h3>Agents requiring attention</h3><p>Sorted by number of flagged categories</p></div><button class="button secondary small" data-go="history">View all records</button></div><div id="attention-table"></div></article>
+      <p class="footnote">Flags use the thresholds in Settings. This tracker supports review and coaching; it does not automatically issue disciplinary actions.</p>
+    </section>
+
+    <section class="view" id="view-daily">
+      <div class="section-heading"><div><h2>Daily entry</h2><p>Save one daily record per agent. You can edit a record later.</p></div><div class="inline-field"><label for="entry-date">Work date</label><input id="entry-date" type="date" /></div></div>
+      <div class="panel form-panel"><form id="daily-form">
+        <input type="hidden" id="record-id" />
+        <div class="form-grid">
+          <div class="field"><label for="entry-agent">Agent *</label><select id="entry-agent" required></select></div>
+          <div class="field"><label for="attendance">Attendance status *</label><select id="attendance" required><option>Present</option><option>Weekly Off</option><option>CL</option><option>LOP</option></select></div>
+        </div>
+        <div id="performance-fields">
+          <div class="form-section-title"><h3>Performance metrics</h3><span class="muted">For Present days only</span></div>
+          <div class="form-grid three">
+            <div class="field"><label for="frt-misses">FRT misses (count)</label><input id="frt-misses" type="number" min="0" step="1" value="0" /></div>
+            <div class="field"><label for="total-chats">Total chats</label><input id="total-chats" type="number" min="0" step="1" value="0" /></div>
+            <div class="field"><label for="verified-orders">Verified orders</label><input id="verified-orders" type="number" min="0" step="1" value="0" /></div>
+            <div class="field"><label for="actual-hours">Actual login hours</label><input id="actual-hours" type="number" min="0" max="24" step="0.25" value="0" /></div>
+            <div class="field"><label for="required-hours">Required login hours</label><input id="required-hours" type="number" min="0" max="24" step="0.25" value="8" /></div>
+            <div class="field"><label for="aht">Daily AHT (minutes)</label><input id="aht" type="number" min="0" step="0.1" placeholder="e.g. 8.5" /></div>
+          </div>
+          <div class="form-grid">
+            <div class="field"><label for="adherence-count">Shift-adherence misses (count)</label><input id="adherence-count" type="number" min="0" step="1" value="0" /></div>
+            <div class="field"><label for="daily-notes">Notes (optional)</label><input id="daily-notes" type="text" maxlength="500" placeholder="Context, exceptions, or evidence reference" /></div>
+          </div>
+          <div class="metric-preview" id="metric-preview"></div>
+        </div>
+        <div class="field" id="lop-reason-wrap" hidden><label for="lop-reason">LOP note / reason (optional)</label><input id="lop-reason" type="text" maxlength="500" placeholder="Add context for attendance reporting" /></div>
+        <div class="form-actions"><button type="button" class="button secondary" id="reset-form">Clear form</button><button type="submit" class="button primary">Save daily record</button></div>
+        <p class="form-message" id="form-message" role="status"></p>
+      </form></div>
+      <article class="panel"><div class="panel-heading"><div><h3>Records for this date</h3><p>Choose Edit to update an existing record.</p></div><span class="count-pill" id="date-record-count">0 records</span></div><div id="date-records-table"></div></article>
+    </section>
+
+    <section class="view" id="view-history">
+      <div class="section-heading"><div><h2>Records & history</h2><p>Filter daily records and review calculated flags.</p></div></div>
+      <div class="panel filters"><div class="filter-grid"><div class="field"><label for="filter-from">From</label><input id="filter-from" type="date" /></div><div class="field"><label for="filter-to">To</label><input id="filter-to" type="date" /></div><div class="field"><label for="filter-agent">Agent</label><select id="filter-agent"><option value="">All agents</option></select></div><div class="field"><label for="filter-status">Attendance</label><select id="filter-status"><option value="">All statuses</option><option>Present</option><option>Weekly Off</option><option>CL</option><option>LOP</option></select></div></div></div>
+      <div class="panel"><div class="panel-heading"><div><h3>Daily records</h3><p id="history-summary">All saved records</p></div><button class="button secondary small" id="export-filtered">Export filtered CSV</button></div><div id="history-table"></div></div>
+      <div class="panel"><div class="panel-heading"><div><h3>Agent summary</h3><p>Totals for the selected filters</p></div></div><div id="agent-summary-table"></div></div>
+    </section>
+
+    <section class="view" id="view-agents">
+      <div class="section-heading"><div><h2>Agents</h2><p>Manage your team, shift requirements, and weekly offs.</p></div></div>
+      <div class="panel form-panel"><form id="agent-form"><input type="hidden" id="agent-edit-id" /><div class="form-grid three"><div class="field"><label for="employee-id">Employee ID *</label><input id="employee-id" required maxlength="40" placeholder="e.g. EMP001" /></div><div class="field"><label for="agent-name">Agent name *</label><input id="agent-name" required maxlength="100" placeholder="Full name" /></div><div class="field"><label for="agent-shift">Shift</label><input id="agent-shift" maxlength="60" placeholder="e.g. 6 AM–3 PM" /></div><div class="field"><label for="agent-required-hours">Required login hours</label><input id="agent-required-hours" type="number" min="0" max="24" step="0.25" value="8" /></div><div class="field"><label for="weekly-off">Weekly off</label><select id="weekly-off"><option value="0">Sunday</option><option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6">Saturday</option><option value="variable">Variable / scheduled manually</option></select></div><div class="field checkbox-field"><label><input id="agent-active" type="checkbox" checked /> Active agent</label></div></div><div class="form-actions"><button type="button" class="button secondary" id="cancel-agent-edit">Clear</button><button class="button primary" type="submit">Save agent</button></div><p id="agent-message" class="form-message" role="status"></p></form></div>
+      <div class="panel"><div class="panel-heading"><div><h3>Team roster</h3><p>Deactivated agents remain in historical reports.</p></div><button class="button secondary small" id="add-demo-agents">Add sample agents</button></div><div id="agents-table"></div></div>
+    </section>
+
+    <section class="view" id="view-actions">
+      <div class="section-heading"><div><h2>Coaching & actions</h2><p>Keep a record of discussions and follow-ups. Actions require your review.</p></div></div>
+      <div class="panel form-panel"><form id="action-form"><input type="hidden" id="action-edit-id" /><div class="form-grid three"><div class="field"><label for="action-agent">Agent *</label><select id="action-agent" required></select></div><div class="field"><label for="action-date">Action date *</label><input id="action-date" type="date" required /></div><div class="field"><label for="action-category">Category *</label><select id="action-category" required><option>FRT</option><option>Conversion</option><option>Shift adherence</option><option>Login hours</option><option>AHT</option><option>Attendance / LOP</option><option>Other</option></select></div><div class="field"><label for="action-type">Action type *</label><select id="action-type" required><option>Observation</option><option>Informal coaching</option><option>Documented discussion</option><option>Formal warning</option><option>Manager review</option><option>HR review</option><option>Follow-up</option></select></div><div class="field"><label for="action-status">Status</label><select id="action-status"><option>Open</option><option>In Progress</option><option>Resolved</option></select></div><div class="field"><label for="follow-up-date">Follow-up date</label><input id="follow-up-date" type="date" /></div><div class="field full"><label for="action-description">Notes / action details *</label><textarea id="action-description" required rows="3" maxlength="2000" placeholder="What was discussed, agreed, or needs follow-up?" ></textarea></div><div class="field"><label for="action-owner">Action owner</label><input id="action-owner" maxlength="100" placeholder="e.g. Team Leader" /></div><div class="field"><label for="action-evidence">Evidence reference</label><input id="action-evidence" maxlength="500" placeholder="Optional reference or link" /></div></div><div class="form-actions"><button type="button" class="button secondary" id="clear-action">Clear form</button><button type="submit" class="button primary">Save action</button></div><p id="action-message" class="form-message" role="status"></p></form></div>
+      <div class="panel"><div class="panel-heading"><div><h3>Action history</h3><p>Review open actions and completed follow-ups.</p></div><select id="action-filter-status" class="compact-select"><option value="">All statuses</option><option>Open</option><option>In Progress</option><option>Resolved</option></select></div><div id="actions-table"></div></div>
+    </section>
+
+    <section class="view" id="view-backup">
+      <div class="section-heading"><div><h2>Backup & settings</h2><p>Configure thresholds and keep your data safe.</p></div></div>
+      <div class="content-grid">
+        <article class="panel form-panel"><div class="panel-heading"><div><h3>Performance thresholds</h3><p>Leave a threshold blank if you do not want that metric flagged.</p></div></div><form id="settings-form"><div class="field"><label for="setting-cvr">CVR target (%)</label><input id="setting-cvr" type="number" min="0" max="100" step="0.1" required /></div><div class="field"><label for="setting-frt">FRT miss count threshold (per day)</label><input id="setting-frt" type="number" min="0" step="1" placeholder="Not configured" /></div><div class="field"><label for="setting-aht">Maximum AHT (minutes)</label><input id="setting-aht" type="number" min="0" step="0.1" placeholder="Not configured" /></div><div class="field"><label for="setting-tolerance">Login-hour shortfall tolerance (hours)</label><input id="setting-tolerance" type="number" min="0" max="24" step="0.25" required /></div><div class="field"><label for="setting-repeat">Repeat-miss review threshold (30 days)</label><input id="setting-repeat" type="number" min="1" step="1" required /></div><div class="form-actions"><button class="button primary" type="submit">Save settings</button></div><p id="settings-message" class="form-message" role="status"></p></form></article>
+        <article class="panel"><div class="panel-heading"><div><h3>Data backup</h3><p>Local backup and GitHub auto-save.</p></div></div><div class="backup-block"><div class="backup-icon">⇩</div><div><strong>Export full backup</strong><p>Download agents, daily records, actions, settings, and audit history as JSON.</p></div><button id="export-json" class="button secondary">Export JSON</button></div><div class="backup-block"><div class="backup-icon">▤</div><div><strong>Export daily records</strong><p>Download all daily records as a spreadsheet-friendly CSV file.</p></div><button id="export-csv" class="button secondary">Export CSV</button></div><div class="backup-block"><div class="backup-icon">⇧</div><div><strong>Restore JSON backup</strong><p>Restoring replaces the current data in this browser. Export a backup first.</p></div><label class="button secondary file-button" for="import-json">Choose JSON</label><input type="file" id="import-json" accept="application/json,.json" hidden /></div><div class="danger-zone"><strong>Reset all local data</strong><p>Permanently clears all agents, records, actions, and settings from this browser.</p><button id="reset-data" class="button danger">Reset data</button></div></article>
+      </div>
+      <article class="panel" id="github-sync-panel">
+        <div class="panel-heading"><div><h3>GitHub auto-save</h3><p>Save your tracker data as a JSON file in a private GitHub repository.</p></div><span id="github-sync-badge" class="pill gray">Not connected</span></div>
+        <p class="muted">Use a <strong>private data repository</strong> and a fine-grained Personal Access Token restricted to that repository with Contents: Read and write. The token is kept in this browser tab's session storage, not committed to GitHub. Anyone who can access the token can edit the data.</p>
+        <div class="form-grid three">
+          <div class="field"><label for="github-owner">Repository owner</label><input id="github-owner" autocomplete="off" placeholder="your-github-username" /></div>
+          <div class="field"><label for="github-repo">Private data repository</label><input id="github-repo" autocomplete="off" placeholder="agent-tracker-data" /></div>
+          <div class="field"><label for="github-branch">Branch</label><input id="github-branch" value="main" autocomplete="off" /></div>
+          <div class="field full"><label for="github-path">Data file path</label><input id="github-path" value="data/agent-tracker-data.json" autocomplete="off" /></div>
+          <div class="field full"><label for="github-token">Fine-grained GitHub token</label><input id="github-token" type="password" autocomplete="new-password" placeholder="github_pat_… (kept for this tab session only)" /></div>
+        </div>
+        <div class="form-actions" style="justify-content:flex-start;flex-wrap:wrap">
+          <button id="github-load" class="button secondary" type="button">Connect & load from GitHub</button>
+          <button id="github-upload" class="button primary" type="button">Connect & upload local data</button>
+          <button id="github-disconnect" class="button secondary" type="button">Disconnect</button>
+        </div>
+        <p id="github-sync-message" class="form-message" role="status">Enter your private data repository details to enable auto-save.</p>
+        <p class="muted">After connection, changes are saved locally immediately and synced to GitHub automatically after a short delay. GitHub creates a commit for each sync. Do not use a public repository for employee records.</p>
+      </article>
+      <article class="panel"><div class="panel-heading"><div><h3>Important limitation</h3><p>This is a static GitHub Pages application.</p></div></div><p class="muted">Without GitHub sync, data is stored only in this browser. With GitHub sync, the JSON data file is saved in the configured private repository. The Pages website may be public even if its source repository is private, depending on your GitHub plan and settings; keep employee data in a separate private repository. Export backups regularly.</p></article>
+    </section>
+    <footer>Agent Performance Tracker <span>•</span> Local-first with optional GitHub auto-save</footer>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
