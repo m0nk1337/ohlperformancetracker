@@ -7,7 +7,9 @@ A simple HTML/CSS/vanilla JavaScript agent performance tracker. No build step an
 - Daily records per agent with Present / Weekly Off / CL / LOP attendance statuses
 - Manual daily FRT miss count
 - CVR calculation from total chats and verified orders (30% default target)
-- Shift-adherence miss counts, login-hour shortfall, configurable AHT and FRT thresholds
+- Fixed shift dropdowns (6 AM–3 PM and 2 PM–11 PM)
+- Actual login/logout time capture with automatic late-login and early-logout flags
+- Additional manual shift-adherence incident counts, login-hour shortfall, configurable AHT and FRT thresholds
 - Dashboard, date filters, agent history and attendance summaries
 - Coaching/action history with follow-up dates
 - Agent roster and weekly-off schedule
@@ -57,6 +59,8 @@ GitHub auto-save requires internet access. If GitHub sync fails, the app still s
 - A missing daily record is a missing-entry warning; it is not inferred to be absence or LOP.
 - CVR is verified orders / total chats. Orders exceeding chats are rejected for manual review.
 - FRT and AHT thresholds are unset by default; configure them before using those flags.
+- Shift adherence compares login time to the assigned shift start and logout time to the assigned shift end, with no grace period: morning is 06:00–15:00 and evening is 14:00–23:00. Blank actual times are not automatically flagged.
+- Daily records store a shift snapshot, so changing an agent's default shift does not change the schedule used for existing records.
 - Consequence actions are manually recorded. The app does not automatically issue disciplinary outcomes.
 
 ## Limitations
